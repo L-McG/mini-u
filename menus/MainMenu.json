@@ -2,10 +2,19 @@
     "Administrative_Tasks": {
         "Description": "A collection of tasks performed by site adminstrators.",
         "Backup_Users": {
-            "Description": "Backup users and their mailboxes."
+            "Description": "Backup users and their mailboxes.",
+            "ScriptText": "Write-Host 'backing up users...'"
         },
         "Force_Password_Change": {
-            "Description": "On next logon, force users to change their password."
+            "Description": "On next logon, force users to change their password.",
+            "User_Set_Password": {
+                "Description": "Allow the user to set password.",
+                "ScriptText": "Write-Host 'setting account to reset password on next logon...'"
+            },
+            "Generate_New_Password": {
+                "Description": "Generate a new password for user.",
+                "ScriptText": "Write-Host 'generating new password and setting account to reset password on next logon...' `n Get-Random"
+            }
         },
         "Mass_Security_Group_Add": {
             "Description": "Add a collection of users to a security group."
