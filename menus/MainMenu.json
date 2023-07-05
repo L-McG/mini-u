@@ -1,0 +1,56 @@
+{
+    "Administrative_Tasks": {
+        "Description": "A collection of tasks performed by site adminstrators.",
+        "Backup_Users": {
+            "Description": "Backup users and their mailboxes."
+        },
+        "Force_Password_Change": {
+            "Description": "On next logon, force users to change their password."
+        },
+        "Mass_Security_Group_Add": {
+            "Description": "Add a collection of users to a security group."
+        }
+    },
+    "General_Tasks": {
+        "Description": "The tasks can be performed by power users to perform site-wide functions",
+        "Mass_File_Rename": {
+            "Description": "Rename all files in a target directory."
+        },
+        "Mass_File_Deletion": {
+            "Description": "Delete all files in a target directory."
+        },
+        "Generate_Icecream": {
+            "Description": "Generate more icecream than anyone knows what to do with."
+        }
+    },
+    "Nuclear_Tasks": {
+        "Description": "Save these tasks for emergency situations.",
+        "Send_Warning_Shot": {
+            "Description": "Send a message to all domain-joined machines."
+        },
+        "Launch_The_Nukes": {
+            "Description": "Don't worry, they nukes aren't real. They can't hurt you."
+        },
+        "Eat_Icecream": {
+            "Description": "Yay icecream!"
+        }
+    },
+    "Play_With_Puppies": {
+        "Description": "D'awwwwww!",
+        "Throw_Ball": {
+            "Description": "Ball!"
+        },
+        "Pet_Puppy": {
+            "Description": "Who's a good boy??"
+        }
+    },
+    "Don't_Play_With_Puppies": {
+        "Description": "Your loss.",
+        "Live_Sad_Life": {
+            "Description": ":("
+        },
+        "Appologize_To_Puppies": {
+            "Description": "The puppies will forgive you."
+        }
+    }
+}
