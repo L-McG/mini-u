@@ -15,6 +15,9 @@ function Draw-Menu {
         $object,
         [Parameter()]
         [String]
+        $navigation,
+        [Parameter()]
+        [String]
         $secondaryKey = 'Description',
         [Parameter()]
         [String]
@@ -29,7 +32,9 @@ function Draw-Menu {
     $titlePaddingString = ' ' * ([Math]::Max(0, $leftTitlePadding))
     $leftDescriptionPadding = ($consoleWidth - $secondaryKey.Length) / 2
     $descriptionPaddingString = ' ' * ([Math]::Max(0, $leftDescriptionPadding))
-    $leftNavigationPadding = ($consoleWidth - $tertiaryKey.Length) / 2
+    $leftTertiaryKeyPadding = ($consoleWidth - $tertiaryKey.Length) / 2
+    $tertiaryKeyPaddingString = ' ' * ([Math]::Max(0, $leftTertiaryKeyPadding))
+    $leftNavigationPadding = ($consoleWidth - $navigation.Length) / 2
     $navigationPaddingString = ' ' * ([Math]::Max(0, $leftNavigationPadding))
 
     Clear-Host
@@ -59,8 +64,7 @@ function Draw-Menu {
     Write-Host `n
     Write-Host `n
     Write-Host $('-' * $consoleWidth -join '')
-    Write-Host ($navigationPaddingString)($tertiaryKey)
-    Write-Host $('-' * $consoleWidth -join '')
+    Write-Host ($navigationPaddingString)($navigation)
 }
 
 function Navigate-Menu {
@@ -74,13 +78,16 @@ function Navigate-Menu {
         $menuTitle = "Menu",
         [Parameter()]
         [System.Object]
-        $object
+        $object,
+        [Parameter()]
+        [String]
+        $navigation        
     )
     $keycode = 0
     $pos = 0
     
     while ($keycode -ne 13 -and $keycode -ne 81 -and $keycode -ne 8) {
-        Draw-Menu $menuItems $pos $menuTitle $object
+        Draw-Menu $menuItems $pos $menuTitle $object $navigation
         $press = $host.ui.rawui.readkey("NoEcho,IncludeKeyDown")
         $keycode = $press.virtualkeycode
         if ($keycode -eq 8) {
@@ -135,21 +142,28 @@ function mini-u {
     [bool]$global:quit = $false
     $MainMenu = (Get-Content .\menus\MainMenu.json | ConvertFrom-Json).PSObject.Properties
     $MenuStack = New-Object System.Collections.ArrayList
+    # generate navigation help
+    $Navigation = Get-Content .\menus\Navigation.json | ConvertFrom-Json
+    $Navigation = $Navigation | ForEach-Object {
+        "[$($_.Key)]-$($_.Function)"
+    }
+    $Navigation = $Navigation -join " "
 
+    # begin main loop
     while(!$global:quit) {
         if ($global:back) {
             $MenuStack.Remove($MenuStack[-1])
             $global:back = $false
         }
         if ($null -eq $MenuStack[0]) {
-            $MainMenuSelection = Navigate-Menu $MainMenu.Name "Main Menu" $MainMenu
+            $MainMenuSelection = Navigate-Menu $MainMenu.Name "Main Menu" $MainMenu $Navigation
             if ($global:quit -or $global:back) {
                 continue
             }
             $MenuStack.Add(($MainMenu[$MainMenuSelection]))
         } else {
             $SubMenu = ($MenuStack[-1].Value | %{$_.PSObject.Properties | ?{$_.Name -ne 'Description'}})
-            $Selection = Navigate-Menu $SubMenu.Name "Select a submenu option" $SubMenu
+            $Selection = Navigate-Menu $SubMenu.Name "Select a submenu option" $SubMenu $Navigation
             if ($global:quit -or $global:back) {
                 continue
             }

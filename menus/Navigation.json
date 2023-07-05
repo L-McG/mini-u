@@ -6,5 +6,13 @@
     {
         "Key": "Backspace",
         "Function": "Back"
+    },
+    {
+        "Key": "Arrow keys",
+        "Function": "Navigate"
+    },
+    {
+        "Key": "Enter",
+        "Function": "Select"
     }
 ]
