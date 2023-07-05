@@ -15,7 +15,10 @@ function Draw-Menu {
         $object,
         [Parameter()]
         [String]
-        $secondaryKey = 'Description'
+        $secondaryKey = 'Description',
+        [Parameter()]
+        [String]
+        $tertiaryKey = 'Navigation'
     )
 
     $menuLength = $menuItems.length
@@ -26,6 +29,8 @@ function Draw-Menu {
     $titlePaddingString = ' ' * ([Math]::Max(0, $leftTitlePadding))
     $leftDescriptionPadding = ($consoleWidth - $secondaryKey.Length) / 2
     $descriptionPaddingString = ' ' * ([Math]::Max(0, $leftDescriptionPadding))
+    $leftNavigationPadding = ($consoleWidth - $tertiaryKey.Length) / 2
+    $navigationPaddingString = ' ' * ([Math]::Max(0, $leftNavigationPadding))
 
     Clear-Host
     Write-Host $('-' * $consoleWidth -join '')
@@ -50,9 +55,15 @@ function Draw-Menu {
     Write-Host $('-' * $consoleWidth -join '')
     # Display the description after the menu is rendered.
     Write-Host "`t$currentDescription"
+
+    Write-Host `n
+    Write-Host `n
+    Write-Host $('-' * $consoleWidth -join '')
+    Write-Host ($navigationPaddingString)($tertiaryKey)
+    Write-Host $('-' * $consoleWidth -join '')
 }
 
-function Menu {
+function Navigate-Menu {
     [CmdletBinding()]
     param (
         [Parameter()]
@@ -68,10 +79,14 @@ function Menu {
     $keycode = 0
     $pos = 0
     
-    while ($keycode -ne 13 -and $keycode -ne 81) {
+    while ($keycode -ne 13 -and $keycode -ne 81 -and $keycode -ne 8) {
         Draw-Menu $menuItems $pos $menuTitle $object
         $press = $host.ui.rawui.readkey("NoEcho,IncludeKeyDown")
         $keycode = $press.virtualkeycode
+        if ($keycode -eq 8) {
+            $global:back = $true
+            break
+        }
         if ($keycode -eq 81) {
             $global:quit = $true
             break
@@ -90,7 +105,7 @@ function Menu {
         }
     }
 
-    if ($null -ne $($menuItems[$pos]) -and !$global:quit) {
+    if ($null -ne $($menuItems[$pos]) -and !$global:quit -and !$global:back) {
         return $($menuItems[$pos])
     }
 }
@@ -116,35 +131,34 @@ function mini-u {
 .EXAMPLE
 	PS> mini-u
 #>
-
-    $MainMenu = (Get-Content .\menus\MainMenu.json | ConvertFrom-Json).PSObject.Properties
-    $MenuStack = [System.Collections.ArrayList]@()
-
+    [bool]$global:back = $false
     [bool]$global:quit = $false
+    $MainMenu = (Get-Content .\menus\MainMenu.json | ConvertFrom-Json).PSObject.Properties
+    $MenuStack = New-Object System.Collections.ArrayList
+
     while(!$global:quit) {
+        if ($global:back) {
+            $MenuStack.Remove($MenuStack[-1])
+            $global:back = $false
+        }
         if ($null -eq $MenuStack[0]) {
-            $MainMenuSelection = Menu $MainMenu.Name "Main Menu" $MainMenu ; Clear-Host
-            $MenuStack.Add($MainMenu[$MainMenuSelection])
-            continue
+            $MainMenuSelection = Navigate-Menu $MainMenu.Name "Main Menu" $MainMenu
+            if ($global:quit -or $global:back) {
+                continue
+            }
+            $MenuStack.Add(($MainMenu[$MainMenuSelection]))
         } else {
             $SubMenu = ($MenuStack[-1].Value | %{$_.PSObject.Properties | ?{$_.Name -ne 'Description'}})
-            $Selection = Menu $SubMenu.Name "Select a submenu option" $SubMenu
+            $Selection = Navigate-Menu $SubMenu.Name "Select a submenu option" $SubMenu
+            if ($global:quit -or $global:back) {
+                continue
+            }
             if ($null -ne (($Submenu | ?{$_.name -eq $Selection}).value).ScriptText) {
                 Invoke-Expression (($Submenu | ?{$_.name -eq $Selection}).value).ScriptText
-                continue
             } else {
                 $MenuStack.Add(($Submenu | ?{$_.name -eq $Selection}))
-                continue
             }
         }
     }
     Clear-Host
-    
-<#     $MainMenuSelection = Menu $MainMenu.Name "Main Menu" $MainMenu ; Clear-Host
-    $SubMenuOptions = $MainMenu | Where-Object{
-        $_.Name -eq $MainMenuSelection
-    }
-    $SubMenu = ($SubMenuOptions.Value | %{$_.PSObject.Properties | ?{$_.Name -ne 'Description'}})
-    $MenuOptionSelection = Menu $SubMenu.Name "Select a submenu option" $SubMenu
-    Write-Host $MenuOptionSelection #>
 }
