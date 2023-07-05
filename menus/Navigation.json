@@ -1,0 +1,10 @@
+[
+    {
+        "Key": "Q",
+        "Function": "Quit"
+    },
+    {
+        "Key": "Backspace",
+        "Function": "Back"
+    }
+]
