@@ -166,6 +166,10 @@ function mini-u {
 
     # begin main loop
     while(!$global:quit) {
+        # check and reset if 'E' was pressed outside of multi-selection menu
+        if ($global:execute) {
+            $global:execute = $false
+        }
         if ($global:back) {
             $MenuStack.Remove($MenuStack[-1])
             $MultiMenuSelections.Clear()
