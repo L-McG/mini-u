@@ -4,6 +4,10 @@
         "Function": "Quit"
     },
     {
+        "Key": "E",
+        "Function": "Execute selections"
+    },
+    {
         "Key": "Backspace",
         "Function": "Back"
     },
