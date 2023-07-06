@@ -17,6 +17,9 @@ function Draw-Menu {
         [String]
         $navigation,
         [Parameter()]
+        [String[]]
+        $selections,
+        [Parameter()]
         [String]
         $secondaryKey = 'Description',
         [Parameter()]
@@ -47,11 +50,19 @@ function Draw-Menu {
     for ($i = 0; $i -lt $menuLength; $i++) {
         Write-Host "`t" -NoNewLine
         if ($i -eq $menuPosition) {
-            Write-Host "$($menuItems[$i])" -ForegroundColor $backgroundColor -BackgroundColor $foregroundColor
+            if ($menuItems[$i] -in $selections) {
+                Write-Host "+ $($menuItems[$i])" -ForegroundColor $backgroundColor -BackgroundColor $foregroundColor
+            } else {
+                Write-Host "$($menuItems[$i])" -ForegroundColor $backgroundColor -BackgroundColor $foregroundColor
+            }
             $currentItem = $menuItems[$i]
             $currentDescription = ($object | Where-Object { $_.Name -eq $currentItem }).Value.Description
         } else {
-            Write-Host "$($menuItems[$i])" -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor
+            if ($menuItems[$i] -in $selections) {
+                Write-Host "+ $($menuItems[$i])" -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor
+            } else {
+                Write-Host "$($menuItems[$i])" -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor
+            }
         }
     }
 
@@ -81,13 +92,16 @@ function Navigate-Menu {
         $object,
         [Parameter()]
         [String]
-        $navigation        
+        $navigation,
+        [Parameter()]
+        [String[]]
+        $selections
     )
     $keycode = 0
     $pos = 0
     
     while ($keycode -ne 13 -and $keycode -ne 81 -and $keycode -ne 8) {
-        Draw-Menu $menuItems $pos $menuTitle $object $navigation
+        Draw-Menu $menuItems $pos $menuTitle $object $navigation $selections
         $press = $host.ui.rawui.readkey("NoEcho,IncludeKeyDown")
         $keycode = $press.virtualkeycode
         if ($keycode -eq 8) {
@@ -96,6 +110,10 @@ function Navigate-Menu {
         }
         if ($keycode -eq 81) {
             $global:quit = $true
+            break
+        }
+        if ($keycode -eq 69) {
+            $global:execute = $true
             break
         }
         if ($keycode -eq 38) {
@@ -112,7 +130,7 @@ function Navigate-Menu {
         }
     }
 
-    if ($null -ne $($menuItems[$pos]) -and !$global:quit -and !$global:back) {
+    if ($null -ne $($menuItems[$pos]) -and !$global:quit -and !$global:back -and !$global:execute) {
         return $($menuItems[$pos])
     }
 }
@@ -135,8 +153,10 @@ function mini-u {
 #>
     [bool]$global:back = $false
     [bool]$global:quit = $false
+    [bool]$global:execute = $false
     $MainMenu = (Get-Content .\menus\MainMenu.json | ConvertFrom-Json -Depth 10).PSObject.Properties
     $MenuStack = New-Object System.Collections.ArrayList
+    $MultiMenuSelections = New-Object System.Collections.ArrayList
     # generate navigation help
     $Navigation = Get-Content .\menus\Navigation.json | ConvertFrom-Json
     $Navigation = $Navigation | ForEach-Object {
@@ -148,6 +168,7 @@ function mini-u {
     while(!$global:quit) {
         if ($global:back) {
             $MenuStack.Remove($MenuStack[-1])
+            $MultiMenuSelections.Clear()
             $global:back = $false
         }
         if ($null -eq $MenuStack[0]) {
@@ -157,7 +178,29 @@ function mini-u {
             }
             $MenuStack.Add(($MainMenu[$MainMenuSelection]))
         } else {
-            $SubMenu = ($MenuStack[-1].Value | %{$_.PSObject.Properties | ?{$_.Name -ne 'Description'}})
+            $CurrentObject = $MenuStack[-1].Value | %{$_.PSObject.Properties}
+            $SubMenu = ($CurrentObject | ?{$_.Name -notin 'Description','Menu_Type'})
+            # check if current menu allows for multiple selections
+            if ('Menu_Type' -in $CurrentObject.Name) {
+                while (!$global:back -and !$global:quit) {
+                    if ($global:execute) {
+                        Write-Host "Executing selections..."
+                        $MultiMenuSelections | ForEach-Object {
+                            $curObj = $_
+                            Invoke-Expression (($Submenu | ?{$_.name -eq $curObj}).value).ScriptText
+                        }
+                        $MultiMenuSelections.Clear()
+                        $global:execute = $false
+                    }
+                    $Selection = Navigate-Menu $SubMenu.Name "Select a submenu option" $SubMenu $Navigation $MultiMenuSelections
+                    if ($Selection -in $MultiMenuSelections) {
+                        $MultiMenuSelections.Remove($Selection)
+                    } else {
+                        $MultiMenuSelections.Add($Selection)
+                    }
+                }
+                continue
+            }
             $Selection = Navigate-Menu $SubMenu.Name "Select a submenu option" $SubMenu $Navigation
             if ($global:quit -or $global:back) {
                 continue

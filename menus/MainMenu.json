@@ -21,6 +21,26 @@
             "ScriptText": "ping google.com"
         }
     },
+    "Multiple_Selection": {
+        "Description": "A demo of selecting multiple items.",
+        "Menu_Type": "Multiple_Selection",
+        "Check_Services": {
+            "Description": "Checks for services not running.",
+            "ScriptText": "Write-Host 'Checking services...' ; Sleep 2"
+        },
+        "Check_Logs": {
+            "Description": "Checks for errors in logs.",
+            "ScriptText": "Write-Host 'Checking logs for errors...' ; Sleep 2"
+        },
+        "Clear_Cache": {
+            "Description": "Clears the cache.",
+            "ScriptText": "Write-Host 'Clearing cache...' ; Sleep 2"
+        },
+        "Update_Hosts_Files": {
+            "Description": "Updates hosts file with hosts and stuff.",
+            "ScriptText": "Write-Host 'Updating hosts file...' ; Sleep 2"
+        }
+    },
     "General_Tasks": {
         "Description": "The tasks can be performed by power users to perform site-wide functions",
         "Mass_File_Rename": {
