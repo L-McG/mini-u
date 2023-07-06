@@ -127,20 +127,15 @@ function mini-u {
     objects within the JSON file that serve as submenus. Each submenu 
     has addition objects that can be selected. Edit the JSON file to 
     create your desired menu layout, currently limited to a depth of
-    2.
-
-    DrawMenu.ps1 allows the user to select menu options with the 
-    Up/Down arrow keys and make a selection with 'Enter'.
+    10.
 .NOTES
-    Version:    v1.0 -- 07 Dec 2022
-                v1.1 -- 23 Jun 2023
 	Author:     Lucas McGlamery
 .EXAMPLE
 	PS> mini-u
 #>
     [bool]$global:back = $false
     [bool]$global:quit = $false
-    $MainMenu = (Get-Content .\menus\MainMenu.json | ConvertFrom-Json).PSObject.Properties
+    $MainMenu = (Get-Content .\menus\MainMenu.json | ConvertFrom-Json -Depth 10).PSObject.Properties
     $MenuStack = New-Object System.Collections.ArrayList
     # generate navigation help
     $Navigation = Get-Content .\menus\Navigation.json | ConvertFrom-Json

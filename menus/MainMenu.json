@@ -3,63 +3,74 @@
         "Description": "A collection of tasks performed by site adminstrators.",
         "Backup_Users": {
             "Description": "Backup users and their mailboxes.",
-            "ScriptText": "Write-Host 'backing up users...'"
+            "ScriptText": "1..10 | ForEach-Object { Write-Progress -Activity 'Backing up users' -PercentComplete ($_/10*100); Start-Sleep -Milliseconds 100}; Write-Progress -Activity 'Backing up users' -Completed"
         },
         "Force_Password_Change": {
             "Description": "On next logon, force users to change their password.",
             "User_Set_Password": {
                 "Description": "Allow the user to set password.",
-                "ScriptText": "Write-Host 'setting account to reset password on next logon...'"
+                "ScriptText": "Write-Host 'Setting account to reset password on next logon...' ; Sleep 2"
             },
             "Generate_New_Password": {
                 "Description": "Generate a new password for user.",
-                "ScriptText": "Write-Host 'generating new password and setting account to reset password on next logon...' `n Get-Random"
+                "ScriptText": "Write-Host 'Generating new password and setting account to reset password on next logon...' ; Sleep 2"
             }
         },
-        "Mass_Security_Group_Add": {
-            "Description": "Add a collection of users to a security group."
+        "Ping_Google!": {
+            "Description": "Ping Google!",
+            "ScriptText": "ping google.com"
         }
     },
     "General_Tasks": {
         "Description": "The tasks can be performed by power users to perform site-wide functions",
         "Mass_File_Rename": {
-            "Description": "Rename all files in a target directory."
+            "Description": "Rename all files in a target directory.",
+            "ScriptText": "1..10 | ForEach-Object { Write-Progress -Activity 'Renaming files' -PercentComplete ($_/10*100); Start-Sleep -Milliseconds 100}; Write-Progress -Activity 'Renaming files' -Completed"
         },
         "Mass_File_Deletion": {
-            "Description": "Delete all files in a target directory."
+            "Description": "Delete all files in a target directory.",
+            "ScriptText": "1..10 | ForEach-Object { Write-Progress -Activity 'Deleting System32' -PercentComplete ($_/10*100); Start-Sleep -Milliseconds 400}; Write-Progress -Activity 'Deleting System32' -Completed"
         },
         "Generate_Icecream": {
-            "Description": "Generate more icecream than anyone knows what to do with."
+            "Description": "Generate more icecream than anyone knows what to do with.",
+            "ScriptText": "1..10 | ForEach-Object { Write-Progress -Activity 'Generating Icecream' -PercentComplete ($_/10*100); Start-Sleep -Milliseconds 100}; Write-Progress -Activity 'Generating Icecream' -Completed"
         }
     },
     "Nuclear_Tasks": {
         "Description": "Save these tasks for emergency situations.",
         "Send_Warning_Shot": {
-            "Description": "Send a message to all domain-joined machines."
+            "Description": "Send a message to all domain-joined machines.",
+            "ScriptText": "Write-Host 'Sending message...' ; Sleep 2"
         },
         "Launch_The_Nukes": {
-            "Description": "Don't worry, they nukes aren't real. They can't hurt you."
+            "Description": "Don't worry, they nukes aren't real. They can't hurt you.",
+            "ScriptText": "Write-Host 'Launching nukes...' ; Sleep 2"
         },
         "Eat_Icecream": {
-            "Description": "Yay icecream!"
+            "Description": "Yay icecream!",
+            "ScriptText": "Write-Host 'Eating icecream...' ; Sleep 2"
         }
     },
     "Play_With_Puppies": {
         "Description": "D'awwwwww!",
         "Throw_Ball": {
-            "Description": "Ball!"
+            "Description": "Ball!",
+            "ScriptText": "1..10 | ForEach-Object { Write-Progress -Activity 'Playing with puppies' -PercentComplete ($_/10*100); Start-Sleep -Milliseconds 100}; Write-Progress -Activity 'Playing with puppies' -Completed"
         },
         "Pet_Puppy": {
-            "Description": "Who's a good boy??"
+            "Description": "Pet the puppies.",
+            "ScriptText": "1..10 | ForEach-Object { Write-Progress -Activity 'Petting puppies' -PercentComplete ($_/10*100); Start-Sleep -Milliseconds 100}; Write-Progress -Activity 'Petting puppies' -Completed"
         }
     },
     "Don't_Play_With_Puppies": {
         "Description": "Your loss.",
         "Live_Sad_Life": {
-            "Description": ":("
+            "Description": ":(",
+            "ScriptText": "Write-Host ':(' ; Sleep 2"
         },
         "Appologize_To_Puppies": {
-            "Description": "The puppies will forgive you."
+            "Description": "The puppies will forgive you.",
+            "ScriptText": "Write-Host 'The puppies have forgiven you.' ; Sleep 2"
         }
     }
 }
