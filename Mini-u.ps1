@@ -185,7 +185,7 @@ function mini-u {
             $CurrentObject = $MenuStack[-1].Value | %{$_.PSObject.Properties}
             $SubMenu = ($CurrentObject | ?{$_.Name -notin 'Description','Menu_Type'})
             # check if current menu allows for multiple selections
-            if ('Menu_Type' -in $CurrentObject.Name) {
+            if ('Multiple_Selection' -in $CurrentObject.value) {
                 while (!$global:back -and !$global:quit) {
                     if ($global:execute) {
                         Write-Host "Executing selections..."
@@ -204,6 +204,16 @@ function mini-u {
                     }
                 }
                 continue
+            }
+            if ('Single_Select_and_Exit' -in $CurrentObject.value) {
+                $Selection = Navigate-Menu $SubMenu.Name "Select a submenu option" $SubMenu $Navigation
+                if (!$global:back) {
+                    $global:quit = $true
+                    return ($SubMenu | ?{$_.Name -eq $Selection}).value.selection
+                    continue
+                } else {
+                    continue
+                }
             }
             $Selection = Navigate-Menu $SubMenu.Name "Select a submenu option" $SubMenu $Navigation
             if ($global:quit -or $global:back) {

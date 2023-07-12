@@ -1,24 +1,18 @@
 {
-    "Administrative_Tasks": {
-        "Description": "A collection of tasks performed by site adminstrators.",
-        "Backup_Users": {
-            "Description": "Backup users and their mailboxes.",
-            "ScriptText": "1..10 | ForEach-Object { Write-Progress -Activity 'Backing up users' -PercentComplete ($_/10*100); Start-Sleep -Milliseconds 100}; Write-Progress -Activity 'Backing up users' -Completed"
+    "Single_Select_and_Exit": {
+        "Description": "A demo of making a single selection and exiting.",
+        "Menu_Type": "Single_Select_and_Exit",
+        "Development": {
+            "Description": "Development environment.",
+            "Selection": "192.168.69.69"
         },
-        "Force_Password_Change": {
-            "Description": "On next logon, force users to change their password.",
-            "User_Set_Password": {
-                "Description": "Allow the user to set password.",
-                "ScriptText": "Write-Host 'Setting account to reset password on next logon...' ; Sleep 2"
-            },
-            "Generate_New_Password": {
-                "Description": "Generate a new password for user.",
-                "ScriptText": "Write-Host 'Generating new password and setting account to reset password on next logon...' ; Sleep 2"
-            }
+        "Test": {
+            "Description": "Test development.",
+            "Selection": "192.168.4.20"
         },
-        "Ping_Google!": {
-            "Description": "Ping Google!",
-            "ScriptText": "ping google.com"
+        "Production": {
+            "Description": "Production development.",
+            "Selection": "192.168.6.66"
         }
     },
     "Multiple_Selection": {
