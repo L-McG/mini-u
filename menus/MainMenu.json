@@ -7,11 +7,11 @@
             "Selection": "192.168.69.69"
         },
         "Test": {
-            "Description": "Test development.",
+            "Description": "Test environment.",
             "Selection": "192.168.4.20"
         },
         "Production": {
-            "Description": "Production development.",
+            "Description": "Production environment.",
             "Selection": "192.168.6.66"
         }
     },
