@@ -50,21 +50,13 @@ function Draw-Menu {
     $menuContent = New-Object System.Collections.ArrayList
 
     # The object used to create borders
-    $borderStencil = [PSCustomObject]@{
-        Text            = $('-' * $consoleWidth)
-        ForegroundColor = $foregroundColor
-        BackgroundColor = $backgroundColor
-    }
+    $borderStencil = New-MenuItem -Text $('-' * $consoleWidth) -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor
 
     # Add Border
     $menuContent.Add($borderStencil)
 
     # Add Title
-    $menuContent.Add([PSCustomObject]@{
-            Text            = "$titlePaddingString$menuTitle"
-            ForegroundColor = $foregroundColor
-            BackgroundColor = $backgroundColor
-        })
+    $menuContent.Add((New-MenuItem -Text "$titlePaddingString$menuTitle" -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor))
 
     # Add Border
     $menuContent.Add($borderStencil)
@@ -74,8 +66,8 @@ function Draw-Menu {
     # Handle current selection color
     foreach ($menuItem in $menuItems) {
         $isSelected = $menuItem -in $selections
-        $isCurrentItem = $menuItem -eq $menuItems[$menuPosition]
-        if ($isCurrentItem) {
+
+        if ($menuItem -eq $menuItems[$menuPosition]) {
             $foreground = $backgroundColor
             $background = $foregroundColor
             $currentDescription = ($object | Where-Object { $_.Name -eq $menuItem }).Value.Description
@@ -84,51 +76,54 @@ function Draw-Menu {
             $foreground = $foregroundColor
             $background = $backgroundColor
         }
-        $menuContent.Add([PSCustomObject]@{
-                Text            = "`t$($isSelected ? '+' : '')$menuItem"
-                ForegroundColor = $foreground
-                BackgroundColor = $background
-            })
+        $menuContent.Add((New-MenuItem -Text "`t$($isSelected ? '+' : '')$menuItem" -ForegroundColor $foreground -BackgroundColor $background))
     }
 
     # Add border
     $menuContent.Add($borderStencil)
 
     # Description for current selection
-    $menuContent.Add([PSCustomObject]@{
-            Text            = "$descriptionPaddingString$secondaryKey"
-            ForegroundColor = $foregroundColor
-            BackgroundColor = $backgroundColor
-        })
+    $menuContent.Add((New-MenuItem -Text "$descriptionPaddingString$secondaryKey" -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor))
 
     # Border
     $menuContent.Add($borderStencil)
 
     # Current selection description
-    $menuContent.Add([PSCustomObject]@{
-            Text            = "`t$currentDescription"
-            ForegroundColor = $foregroundColor
-            BackgroundColor = $backgroundColor
-        })
+
+    $menuContent.Add((New-MenuItem -Text "`t$currentDescription" -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor))
 
     # Vertical spacing and border
-    $menuContent.Add([PSCustomObject]@{
-            Text            = "`n`n$('-' * $consoleWidth)"
-            ForegroundColor = $foregroundColor
-            BackgroundColor = $backgroundColor
-        })
+    $menuContent.Add((New-MenuItem -Text "`n`n$('-' * $consoleWidth)" -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor))
 
-
-    $menuContent.Add([PSCustomObject]@{
-            Text            = "$navigationPaddingString$navigation"
-            ForegroundColor = $foregroundColor
-            BackgroundColor = $backgroundColor
-        })
-
+    $menuContent.Add((New-MenuItem -Text "$navigationPaddingString$navigation" -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor))
     # Clear the screen after the string is built so there is no pop in
     Clear-Host
     $menuContent | ForEach-Object {
         Write-Host $_.Text -ForegroundColor $_.ForegroundColor -BackgroundColor $_.BackgroundColor
+    }
+}
+
+function New-MenuItem {
+    <#
+.SYNOPSIS
+	This function servers to provide a more consice way to create menu items that will be printed with Write-Host.
+.DESCRIPTION
+   creates a custom object that holds information about text, along with its foreground and background colors
+.NOTES
+	Author: Tadgh Henry
+.EXAMPLE
+	New-MenuItem -Text "`t$currentDescription" -ForegroundColor white -BackgroundColor DarkGreen
+#>
+    param (
+        [string]$Text,
+        [ConsoleColor]$ForegroundColor,
+        [ConsoleColor]$BackgroundColor
+    )
+
+    return [PSCustomObject]@{
+        Text            = $Text
+        ForegroundColor = $ForegroundColor
+        BackgroundColor = $BackgroundColor
     }
 }
 
