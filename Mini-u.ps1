@@ -38,42 +38,107 @@ function Draw-Menu {
 
     $leftDescriptionPadding = ($consoleWidth - $secondaryKey.Length) / 2
     $descriptionPaddingString = ' ' * ([Math]::Max(0, $leftDescriptionPadding))
+
     $leftTertiaryKeyPadding = ($consoleWidth - $tertiaryKey.Length) / 2
     $tertiaryKeyPaddingString = ' ' * ([Math]::Max(0, $leftTertiaryKeyPadding))
+
     $leftNavigationPadding = ($consoleWidth - $navigation.Length) / 2
     $navigationPaddingString = ' ' * ([Math]::Max(0, $leftNavigationPadding))
 
-    Clear-Host
-    Write-Host $('-' * $consoleWidth -join '')
-    Write-Host ($titlePaddingString)($menuTitle)
-    Write-Host $('-' * $consoleWidth -join '')
+
+    # Build the entire menu string before clearing the screen
+    $menuContent = New-Object System.Collections.ArrayList
+
+    # Add Border
+    $menuContent.Add([PSCustomObject]@{
+            Text            = $('-' * $consoleWidth)
+            ForegroundColor = $foregroundColor
+            BackgroundColor = $backgroundColor
+        })
+
+    # Add Title
+    $menuContent.Add([PSCustomObject]@{
+            Text            = "$titlePaddingString$menuTitle"
+            ForegroundColor = $foregroundColor
+            BackgroundColor = $backgroundColor
+        })
+
+    # Add Border
+    $menuContent.Add([PSCustomObject]@{
+            Text            = $('-' * $consoleWidth)
+            ForegroundColor = $foregroundColor
+            BackgroundColor = $backgroundColor
+        })
 
     $currentDescription = ''
 
-
+    # Handle current selection color
     foreach ($menuItem in $menuItems) {
         $isSelected = $menuItem -in $selections
         $isCurrentItem = $menuItem -eq $menuItems[$menuPosition]
-        Write-Host "`t" -NoNewline
         if ($isCurrentItem) {
-            Write-Host "$($isSelected ? '+' : '')$menuItem" -ForegroundColor $backgroundColor -BackgroundColor $foregroundColor
+            $foreground = $backgroundColor
+            $background = $foregroundColor
             $currentDescription = ($object | Where-Object { $_.Name -eq $menuItem }).Value.Description
         }
         else {
-            Write-Host "$($isSelected ? '+' : '')$menuItem" -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor
+            $foreground = $foregroundColor
+            $background = $backgroundColor
         }
+        $menuContent.Add([PSCustomObject]@{
+                Text            = "`t$($isSelected ? '+' : '')$menuItem"
+                ForegroundColor = $foreground
+                BackgroundColor = $background
+            })
     }
 
-    Write-Host $('-' * $consoleWidth -join '')
-    Write-Host ($descriptionPaddingString)($secondaryKey)
-    Write-Host $('-' * $consoleWidth -join '')
-    # Display the description after the menu is rendered.
-    Write-Host "`t$currentDescription"
+    # Add border
+    $menuContent.Add([PSCustomObject]@{
+            Text            = $('-' * $consoleWidth)
+            ForegroundColor = $foregroundColor
+            BackgroundColor = $backgroundColor
+        })
 
-    Write-Host `n
-    Write-Host `n
-    Write-Host $('-' * $consoleWidth -join '')
-    Write-Host ($navigationPaddingString)($navigation)
+    # Description for current selection
+    $menuContent.Add([PSCustomObject]@{
+            Text            = "$descriptionPaddingString$secondaryKey"
+            ForegroundColor = $foregroundColor
+            BackgroundColor = $backgroundColor
+        })
+
+    # Border
+    $menuContent.Add([PSCustomObject]@{
+            Text            = $('-' * $consoleWidth)
+            ForegroundColor = $foregroundColor
+            BackgroundColor = $backgroundColor
+        })
+
+    # Current selection description
+    $menuContent.Add([PSCustomObject]@{
+            Text            = "`t$currentDescription"
+            ForegroundColor = $foregroundColor
+            BackgroundColor = $backgroundColor
+        })
+
+    # Vertical spacing and border
+    $menuContent.Add([PSCustomObject]@{
+            Text            = "`n`n$('-' * $consoleWidth)"
+            ForegroundColor = $foregroundColor
+            BackgroundColor = $backgroundColor
+        })
+
+
+    $menuContent.Add([PSCustomObject]@{
+            Text            = "$navigationPaddingString$navigation"
+            ForegroundColor = $foregroundColor
+            BackgroundColor = $backgroundColor
+        })
+
+    # Clear the screen after the string is built so there is no pop in
+    Clear-Host
+    $menuContent | ForEach-Object {
+        Write-Host $_.Text -ForegroundColor $_.ForegroundColor -BackgroundColor $_.BackgroundColor
+    }
 }
 
 function Navigate-Menu {
