@@ -49,6 +49,7 @@ function Draw-Menu {
     # Build the entire menu string before clearing the screen
     $menuContent = New-Object System.Collections.ArrayList
 
+    # The object used to create borders
     $borderStencil = [PSCustomObject]@{
         Text            = $('-' * $consoleWidth)
         ForegroundColor = $foregroundColor
