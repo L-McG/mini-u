@@ -29,10 +29,13 @@ function Draw-Menu {
 
     $menuLength = $menuItems.length
     $consoleWidth = $host.ui.RawUI.WindowSize.Width
+
     $foregroundColor = $host.UI.RawUI.ForegroundColor
     $backgroundColor = $host.UI.RawUI.BackgroundColor
+
     $leftTitlePadding = ($consoleWidth - $menuTitle.Length) / 2
     $titlePaddingString = ' ' * ([Math]::Max(0, $leftTitlePadding))
+
     $leftDescriptionPadding = ($consoleWidth - $secondaryKey.Length) / 2
     $descriptionPaddingString = ' ' * ([Math]::Max(0, $leftDescriptionPadding))
     $leftTertiaryKeyPadding = ($consoleWidth - $tertiaryKey.Length) / 2
@@ -45,24 +48,19 @@ function Draw-Menu {
     Write-Host ($titlePaddingString)($menuTitle)
     Write-Host $('-' * $consoleWidth -join '')
 
-    $currentDescription = ""
+    $currentDescription = ''
 
-    for ($i = 0; $i -lt $menuLength; $i++) {
-        Write-Host "`t" -NoNewLine
-        if ($i -eq $menuPosition) {
-            if ($menuItems[$i] -in $selections) {
-                Write-Host "+ $($menuItems[$i])" -ForegroundColor $backgroundColor -BackgroundColor $foregroundColor
-            } else {
-                Write-Host "$($menuItems[$i])" -ForegroundColor $backgroundColor -BackgroundColor $foregroundColor
-            }
-            $currentItem = $menuItems[$i]
-            $currentDescription = ($object | Where-Object { $_.Name -eq $currentItem }).Value.Description
-        } else {
-            if ($menuItems[$i] -in $selections) {
-                Write-Host "+ $($menuItems[$i])" -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor
-            } else {
-                Write-Host "$($menuItems[$i])" -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor
-            }
+
+    foreach ($menuItem in $menuItems) {
+        $isSelected = $menuItem -in $selections
+        $isCurrentItem = $menuItem -eq $menuItems[$menuPosition]
+        Write-Host "`t" -NoNewline
+        if ($isCurrentItem) {
+            Write-Host "$($isSelected ? '+' : '')$menuItem" -ForegroundColor $backgroundColor -BackgroundColor $foregroundColor
+            $currentDescription = ($object | Where-Object { $_.Name -eq $menuItem }).Value.Description
+        }
+        else {
+            Write-Host "$($isSelected ? '+' : '')$menuItem" -ForegroundColor $foregroundColor -BackgroundColor $backgroundColor
         }
     }
 
@@ -86,7 +84,7 @@ function Navigate-Menu {
         $menuItems,
         [Parameter()]
         [String]
-        $menuTitle = "Menu",
+        $menuTitle = 'Menu',
         [Parameter()]
         [System.Object]
         $object,
@@ -99,10 +97,10 @@ function Navigate-Menu {
     )
     $keycode = 0
     $pos = 0
-    
+
     while ($keycode -ne 13 -and $keycode -ne 81 -and $keycode -ne 8) {
         Draw-Menu $menuItems $pos $menuTitle $object $navigation $selections
-        $press = $host.ui.rawui.readkey("NoEcho,IncludeKeyDown")
+        $press = $host.ui.rawui.readkey('NoEcho,IncludeKeyDown')
         $keycode = $press.virtualkeycode
         if ($keycode -eq 8) {
             $global:back = $true
@@ -135,15 +133,15 @@ function Navigate-Menu {
     }
 }
 function mini-u {
-<#
+    <#
 .SYNOPSIS
-	This function serves as an example of how I implement command line 
-    interface menus in PowerShell. To use this, run 
+	This function serves as an example of how I implement command line
+    interface menus in PowerShell. To use this, run
     'Import-Module .\Mini-u.ps1' from within this project's directory.
 .DESCRIPTION
     Using a JSON file, a main menu is generated which contain names to
-    objects within the JSON file that serve as submenus. Each submenu 
-    has addition objects that can be selected. Edit the JSON file to 
+    objects within the JSON file that serve as submenus. Each submenu
+    has addition objects that can be selected. Edit the JSON file to
     create your desired menu layout, currently limited to a depth of
     10.
 .NOTES
@@ -162,10 +160,10 @@ function mini-u {
     $Navigation = $Navigation | ForEach-Object {
         "[$($_.Key)]-$($_.Function)"
     }
-    $Navigation = $Navigation -join " "
+    $Navigation = $Navigation -join ' '
 
     # begin main loop
-    while(!$global:quit) {
+    while (!$global:quit) {
         # check and reset if 'E' was pressed outside of multi-selection menu
         if ($global:execute) {
             $global:execute = $false
@@ -176,53 +174,57 @@ function mini-u {
             $global:back = $false
         }
         if ($null -eq $MenuStack[0]) {
-            $MainMenuSelection = Navigate-Menu $MainMenu.Name "Main Menu" $MainMenu $Navigation
+            $MainMenuSelection = Navigate-Menu $MainMenu.Name 'Main Menu' $MainMenu $Navigation
             if ($global:quit -or $global:back) {
                 continue
             }
             $MenuStack.Add(($MainMenu[$MainMenuSelection]))
-        } else {
-            $CurrentObject = $MenuStack[-1].Value | %{$_.PSObject.Properties}
-            $SubMenu = ($CurrentObject | ?{$_.Name -notin 'Description','Menu_Type'})
+        }
+        else {
+            $CurrentObject = $MenuStack[-1].Value | ForEach-Object { $_.PSObject.Properties }
+            $SubMenu = ($CurrentObject | Where-Object { $_.Name -notin 'Description', 'Menu_Type' })
             # check if current menu allows for multiple selections
             if ('Multiple_Selection' -in $CurrentObject.value) {
                 while (!$global:back -and !$global:quit) {
                     if ($global:execute) {
-                        Write-Host "Executing selections..."
+                        Write-Host 'Executing selections...'
                         $MultiMenuSelections | ForEach-Object {
                             $curObj = $_
-                            Invoke-Expression (($Submenu | ?{$_.name -eq $curObj}).value).ScriptText
+                            Invoke-Expression (($Submenu | Where-Object { $_.name -eq $curObj }).value).ScriptText
                         }
                         $MultiMenuSelections.Clear()
                         $global:execute = $false
                     }
-                    $Selection = Navigate-Menu $SubMenu.Name "Select a submenu option" $SubMenu $Navigation $MultiMenuSelections
+                    $Selection = Navigate-Menu $SubMenu.Name 'Select a submenu option' $SubMenu $Navigation $MultiMenuSelections
                     if ($Selection -in $MultiMenuSelections) {
                         $MultiMenuSelections.Remove($Selection)
-                    } else {
+                    }
+                    else {
                         $MultiMenuSelections.Add($Selection)
                     }
                 }
                 continue
             }
             if ('Single_Select_and_Exit' -in $CurrentObject.value) {
-                $Selection = Navigate-Menu $SubMenu.Name "Select a submenu option" $SubMenu $Navigation
+                $Selection = Navigate-Menu $SubMenu.Name 'Select a submenu option' $SubMenu $Navigation
                 if (!$global:back) {
                     $global:quit = $true
-                    return ($SubMenu | ?{$_.Name -eq $Selection}).value.selection
+                    return ($SubMenu | Where-Object { $_.Name -eq $Selection }).value.selection
                     continue
-                } else {
+                }
+                else {
                     continue
                 }
             }
-            $Selection = Navigate-Menu $SubMenu.Name "Select a submenu option" $SubMenu $Navigation
+            $Selection = Navigate-Menu $SubMenu.Name 'Select a submenu option' $SubMenu $Navigation
             if ($global:quit -or $global:back) {
                 continue
             }
-            if ($null -ne (($Submenu | ?{$_.name -eq $Selection}).value).ScriptText) {
-                Invoke-Expression (($Submenu | ?{$_.name -eq $Selection}).value).ScriptText
-            } else {
-                $MenuStack.Add(($Submenu | ?{$_.name -eq $Selection}))
+            if ($null -ne (($Submenu | Where-Object { $_.name -eq $Selection }).value).ScriptText) {
+                Invoke-Expression (($Submenu | Where-Object { $_.name -eq $Selection }).value).ScriptText
+            }
+            else {
+                $MenuStack.Add(($Submenu | Where-Object { $_.name -eq $Selection }))
             }
         }
     }
