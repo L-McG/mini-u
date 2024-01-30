@@ -49,12 +49,14 @@ function Draw-Menu {
     # Build the entire menu string before clearing the screen
     $menuContent = New-Object System.Collections.ArrayList
 
+    $borderStencil = [PSCustomObject]@{
+        Text            = $('-' * $consoleWidth)
+        ForegroundColor = $foregroundColor
+        BackgroundColor = $backgroundColor
+    }
+
     # Add Border
-    $menuContent.Add([PSCustomObject]@{
-            Text            = $('-' * $consoleWidth)
-            ForegroundColor = $foregroundColor
-            BackgroundColor = $backgroundColor
-        })
+    $menuContent.Add($borderStencil)
 
     # Add Title
     $menuContent.Add([PSCustomObject]@{
@@ -64,11 +66,7 @@ function Draw-Menu {
         })
 
     # Add Border
-    $menuContent.Add([PSCustomObject]@{
-            Text            = $('-' * $consoleWidth)
-            ForegroundColor = $foregroundColor
-            BackgroundColor = $backgroundColor
-        })
+    $menuContent.Add($borderStencil)
 
     $currentDescription = ''
 
@@ -93,11 +91,7 @@ function Draw-Menu {
     }
 
     # Add border
-    $menuContent.Add([PSCustomObject]@{
-            Text            = $('-' * $consoleWidth)
-            ForegroundColor = $foregroundColor
-            BackgroundColor = $backgroundColor
-        })
+    $menuContent.Add($borderStencil)
 
     # Description for current selection
     $menuContent.Add([PSCustomObject]@{
@@ -107,11 +101,7 @@ function Draw-Menu {
         })
 
     # Border
-    $menuContent.Add([PSCustomObject]@{
-            Text            = $('-' * $consoleWidth)
-            ForegroundColor = $foregroundColor
-            BackgroundColor = $backgroundColor
-        })
+    $menuContent.Add($borderStencil)
 
     # Current selection description
     $menuContent.Add([PSCustomObject]@{
