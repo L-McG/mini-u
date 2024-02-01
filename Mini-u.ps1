@@ -153,24 +153,28 @@ function Navigate-Menu {
         Draw-Menu $menuItems $pos $menuTitle $object $navigation $selections
         $press = $host.ui.rawui.readkey('NoEcho,IncludeKeyDown')
         $keycode = $press.virtualkeycode
-        if ($keycode -eq 8) {
-            $global:back = $true
-            break
+
+        switch ($keycode) {
+            8 {
+                $global:back = $true
+                break
+            }
+            81 {
+                $global:quit = $true
+                break
+            }
+            69 {
+                $global:execute = $true
+                break
+            }
+            38 {
+                $pos--
+            }
+            40 {
+                $pos++
+            }
         }
-        if ($keycode -eq 81) {
-            $global:quit = $true
-            break
-        }
-        if ($keycode -eq 69) {
-            $global:execute = $true
-            break
-        }
-        if ($keycode -eq 38) {
-            $pos--
-        }
-        if ($keycode -eq 40) {
-            $pos++
-        }
+
         if ($pos -lt 0) {
             $pos = ($menuItems.length - 1)
         }
@@ -200,6 +204,9 @@ function mini-u {
 .EXAMPLE
 	PS> mini-u
 #>
+
+    # Increases console buffer ?*
+    [System.Console]::SetBufferSize($host.ui.RawUI.WindowSize.Width, $host.ui.RawUI.WindowSize.Height)
     [bool]$global:back = $false
     [bool]$global:quit = $false
     [bool]$global:execute = $false
@@ -235,27 +242,6 @@ function mini-u {
             $CurrentObject = $MenuStack[-1].Value | ForEach-Object { $_.PSObject.Properties }
             $SubMenu = ($CurrentObject | Where-Object { $_.Name -notin 'Description', 'Menu_Type' })
             # check if current menu allows for multiple selections
-            if ('Multiple_Selection' -in $CurrentObject.value) {
-                while (!$global:back -and !$global:quit) {
-                    if ($global:execute) {
-                        Write-Host 'Executing selections...'
-                        $MultiMenuSelections | ForEach-Object {
-                            $curObj = $_
-                            Invoke-Expression (($Submenu | Where-Object { $_.name -eq $curObj }).value).ScriptText
-                        }
-                        $MultiMenuSelections.Clear()
-                        $global:execute = $false
-                    }
-                    $Selection = Navigate-Menu $SubMenu.Name 'Select a submenu option' $SubMenu $Navigation $MultiMenuSelections
-                    if ($Selection -in $MultiMenuSelections) {
-                        $MultiMenuSelections.Remove($Selection)
-                    }
-                    else {
-                        $MultiMenuSelections.Add($Selection)
-                    }
-                }
-                continue
-            }
             if ('Single_Select_and_Exit' -in $CurrentObject.value) {
                 $Selection = Navigate-Menu $SubMenu.Name 'Select a submenu option' $SubMenu $Navigation
                 if (!$global:back) {
