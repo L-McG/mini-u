@@ -242,6 +242,27 @@ function mini-u {
             $CurrentObject = $MenuStack[-1].Value | ForEach-Object { $_.PSObject.Properties }
             $SubMenu = ($CurrentObject | Where-Object { $_.Name -notin 'Description', 'Menu_Type' })
             # check if current menu allows for multiple selections
+            if ('Multiple_Selection' -in $CurrentObject.value) {
+                while (!$global:back -and !$global:quit) {
+                    if ($global:execute) {
+                        Write-Host 'Executing selections...'
+                        $MultiMenuSelections | ForEach-Object {
+                            $curObj = $_
+                            Invoke-Expression (($Submenu | Where-Object { $_.name -eq $curObj }).value).ScriptText
+                        }
+                        $MultiMenuSelections.Clear()
+                        $global:execute = $false
+                    }
+                    $Selection = Navigate-Menu $SubMenu.Name 'Select a submenu option' $SubMenu $Navigation $MultiMenuSelections
+                    if ($Selection -in $MultiMenuSelections) {
+                        $MultiMenuSelections.Remove($Selection)
+                    }
+                    else {
+                        $MultiMenuSelections.Add($Selection)
+                    }
+                }
+                continue
+            }
             if ('Single_Select_and_Exit' -in $CurrentObject.value) {
                 $Selection = Navigate-Menu $SubMenu.Name 'Select a submenu option' $SubMenu $Navigation
                 if (!$global:back) {
